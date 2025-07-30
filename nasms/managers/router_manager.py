@@ -17,7 +17,7 @@ from logging import Logger
 
 from tplinkrouterc6udraftsms.common.exception import *
 
-from .utils.colors import *
+from ..utils.colors import *
 
 router = None
 

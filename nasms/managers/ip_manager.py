@@ -1,7 +1,7 @@
 from importlib.resources import files
 import ipaddress
 
-from .utils.colors import *
+from ..utils.colors import *
 
 from . import config_manager
 

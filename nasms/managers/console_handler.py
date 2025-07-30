@@ -1,4 +1,4 @@
-from .utils.colors import *
+from ..utils.colors import *
 from . import router_manager
 from . import config_manager
 from . import ip_manager

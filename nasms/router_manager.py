@@ -34,3 +34,6 @@ def authorize(url : str, password : str) -> bool:
         print(RED + "\nCould not log in, reason from the tplinkrouterc6u library: " + PURPLE + str(e) + RESET)
         return False
     return True
+
+def logOut() -> None:    
+    router.logout()

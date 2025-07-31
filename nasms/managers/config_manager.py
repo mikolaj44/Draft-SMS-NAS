@@ -1,20 +1,29 @@
 from importlib.resources import files
 import json
 
-config = None
-file = None
+user_config = None
+user_config_file = None
 
-def getConfig() -> None:
-    global config, file
+program_config = None
+program_config_file = None
+
+def get_config() -> None:
+    global user_config, user_config_file, program_config, program_config_file
     
-    file = files("nasms") / "config.json"
+    user_config_file = files("nasms") / "user_config.json"
+    program_config_file = files("nasms") / "data/program_config.json"
 
-    with file.open("r+", encoding="utf-8") as f:
-        config = json.load(f)
+    with user_config_file.open("r+", encoding="utf-8") as f:
+        user_config = json.load(f)
 
-def updateConfig() -> None:
-    global config, file
+    with program_config_file.open("r+", encoding="utf-8") as f:
+        program_config = json.load(f)
 
-    with file.open("r+", encoding="utf-8") as f:
+def update_config() -> None:
+    with user_config_file.open("r+", encoding="utf-8") as f:
         f.truncate(0)
-        json.dump(config, f)
+        json.dump(user_config, f, indent=4)
+
+    with program_config_file.open("r+", encoding="utf-8") as f:
+        f.truncate(0)
+        json.dump(program_config, f, indent=4)

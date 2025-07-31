@@ -5,17 +5,17 @@ from ..utils.colors import *
 
 from . import config_manager
 
-def ipIsValid(ip : str) -> bool:
+def ip_is_valid(ip : str) -> bool:
     try:
         ipaddress.ip_interface(ip)
         return True
     except ValueError:
         return False
 
-def getIP() -> None:
-    ip = config_manager.config["url"]
+def get_ip() -> None:
+    ip = config_manager.user_config["url"]
 
-    if(ipIsValid(ip)):
+    if(ip_is_valid(ip)):
         return
 
     print(LIGHT_GREEN + "Please enter your router private ip:\n" + RESET)
@@ -23,9 +23,9 @@ def getIP() -> None:
     while (True):
         ip = input()
 
-        if(ipIsValid(ip)):
+        if(ip_is_valid(ip)):
             break
         else:
             print(RED + "Please enter a valid IPv4 address.\n" + RESET)
 
-    config_manager.config["url"] = ip
+    config_manager.user_config["url"] = ip

@@ -1,0 +1,6 @@
+{
+    "comment": "This file can be safely edited, it's just for convenience, only the last field should probably be left unchanged.",
+    "url": "192.168.1.1",
+    "show-warnings": false,
+    "ensure_router_is_MR": true
+}

@@ -7,7 +7,7 @@ user_config_file = None
 program_config = None
 program_config_file = None
 
-def get_config() -> None:
+def set_config() -> None:
     global user_config, user_config_file, program_config, program_config_file
     
     user_config_file = files("nasms") / "user_config.json"

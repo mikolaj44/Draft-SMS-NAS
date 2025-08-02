@@ -1,33 +1,23 @@
 from tplinkrouterc6udraftsms import (
     TplinkRouterProvider,
-    TplinkRouter,
-    TplinkC1200Router,
-    TplinkC5400XRouter,
     TPLinkMRClient,
-    TPLinkVRClient,
-    TPLinkEXClient,
-    TPLinkXDRClient,
-    TPLinkDecoClient,
-    TplinkC80Router,
-    TplinkWDRRouter,
-    Connection,
-    SMS
 )
 
 from tplinkrouterc6udraftsms.common.exception import *
 
 from ...utils.colors import *
+from ...utils.math_utils import *
 
 from ...managers import config_manager
 
 router = None
 
-PHONE_NUMBER = "12345678"
+PHONE_NUMBER = "123456789"
 
 def authorize(url : str, password : str) -> bool:
     global router
 
-    print("\nLogging in, please wait...\n")
+    print("\nLogging in, please wait...")
 
     try:
         router = TplinkRouterProvider.get_client(f"http://{url}", password)
@@ -44,31 +34,41 @@ def authorize(url : str, password : str) -> bool:
 def log_out() -> None:    
     router.logout()
 
-def send_data(data: str) -> None:
-    pass
-
-def send_data(messages: list[str]) -> None:
+def send_messages(messages: list[str]) -> None:
     router.send_sms(phone_number=PHONE_NUMBER, messages=messages, draft=True)
 
-def get_first_page_messages() -> list[str]:
-    data = router.get_sms(getFromDraft=True,pageIndex=1)
-
+def get_messages(start_index: int = 1, num_messages: int = 1) -> list[str]:
     messages = []
+    max_messages_per_page = config_manager.program_config["num_messages_per_page"] 
 
-    for message in data:
-        messages.append(message.content)
+    for pageIndex in range (ceildiv(start_index, max_messages_per_page), ceildiv(start_index + num_messages, max_messages_per_page) + 1):
+        messages += router.get_sms_content(get_from_draft=True, page_index=pageIndex)
+
+    start_cutoff = (start_index % max_messages_per_page) - 1
+    end_cutoff = max_messages_per_page - ((start_index + num_messages - 1) % max_messages_per_page)
+    length = len(messages)
+                                            
+    messages = messages[start_cutoff : length if end_cutoff > length else length - end_cutoff]
 
     return messages
 
-# def get_messages(startIndex: int = 1, numMessages: int = 1) -> list[str]:
-#     data = router.get_sms(getFromDraft=True,pageIndex=1)
+def get_first_page_messages() -> list[str]:
+    return router.get_sms_content(get_from_draft=True, page_index=1)
 
-#     messages = []
+def remove_messages(start_index: int, num_messages: int) -> None:
+    max_messages_per_page = config_manager.program_config["num_messages_per_page"]
 
-#     for message in data:
-#         messages.append(message.content)
+    router.delete_smses(start_sms_index=start_index, num_smses=max_messages_per_page, delete_from_draft=True)
 
-#     return messages
+def remove_all_messages() -> None:
+    can_remove = True
 
-# def remove_messages(startIndex: int = 1, numMessages: int = 1) -> None:
-#     pass
+    page_index = 1
+    max_messages_per_page = config_manager.program_config["num_messages_per_page"] 
+
+    while(can_remove):
+        print(f"\nRemoving page {page_index}...")
+
+        can_remove = router.delete_sms_page(page_index=1, max_messages_per_page=max_messages_per_page, delete_from_draft=True)
+        
+        page_index += 1

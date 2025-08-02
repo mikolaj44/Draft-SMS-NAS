@@ -1,6 +1,7 @@
 {
-    "comment": "Editing this file manually will result in breaking the program! Only do this if you want to experiment.",
-    "is_initial_setup": true,
+    "comment": "Editing this file manually may result in breaking the program! Only do this if you want to experiment.",
+    "is_initial_setup": false,
     "num_messages_to_send_to_find_num_per_page": 20,
-    "num_messages_per_page": 8
+    "num_messages_per_page": 8,
+    "max_bytes_per_message": 1430
 }

@@ -12,7 +12,7 @@ def ip_is_valid(ip : str) -> bool:
     except ValueError:
         return False
 
-def get_ip() -> None:
+def set_ip() -> None:
     ip = config_manager.user_config["url"]
 
     if(ip_is_valid(ip)):

@@ -1,11 +1,9 @@
 from .menu_action import *
 
-from ...managers.router import router_manager
+from ..managers import console_handler
 
 class LogOut(MenuAction):
     def select(self):
         print("\nLogging out, please wait...\n")
 
-        router_manager.log_out()
-
-        print("Logged out successfully.\n")
+        console_handler.safe_exit()

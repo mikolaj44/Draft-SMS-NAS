@@ -2,27 +2,20 @@ from ...utils.colors import *
 from ...utils.proceed_prompt import *
 from ...utils.math_utils import *
 
-from ...data.actions.list_files import *
-from ...data.actions.load_file import *
-from ...data.actions.log_out import *
-from ...data.actions.remove_file import *
-from ...data.actions.store_file import *
+from .file_helpers import *
+
+from ...actions.list_files import *
+from ...actions.load_file import *
+from ...actions.log_out import *
+from ...actions.remove_file import *
+from ...actions.store_file import *
 
 from ..router import router_manager
 from .. import config_manager
-from .. import ip_manager
 
 from importlib.resources import files
-import stdiomask
-
-mime = magic.Magic(mime=True)
 
 MAX_FILE_NAME_LENGTH = 4
-
-def file_name_is_valid(name: str) -> bool:
-    length = len(name)
-
-    return length >= 1 and length <= file_manager.MAX_FILE_NAME_LENGTH and name.isalnum()
 
 def set_config_num_messages_per_page() -> bool:
     num_messages_per_page = config_manager.program_config["num_messages_per_page"]
@@ -62,79 +55,51 @@ def prepare_memory() -> bool:
     
     router_manager.remove_all_messages()
 
+    router_manager.send_messages(messages=["0;"])
+
     print("\nWiping done! Thank you for your patience.\n")
 
     config_manager.program_config["is_initial_setup"] = False
-
-    router_manager.send_messages(messages=["list"])
 
     return True
 
 def get_file_list() -> str:
     return router_manager.get_messages()[0]
 
-def get_file_names(file_list: str) -> list[str]:
-    parts = file_list.split(";")
-
-    names = []
-
-    for part in parts:
-        names.append(part[:MAX_FILE_NAME_LENGTH])
-
-    return names
-
-def get_next_file_start_index(file_list : str) -> int:
-    if(file_list == ";"):
-        return 1
-    
-    parts = file_list.split(";")
-    
-    return int(parts[-1][MAX_FILE_NAME_LENGTH:])
-
-def update_file_list(old_content: str, name: str, start_index: int) -> None:
+def update_file_list(new_content: str) -> None:
     print("\nSending a new file list...")
-    router_manager.send_messages(messages=[old_content + name + start_index])
+    router_manager.send_messages(messages=[new_content])
 
     print("\nRemoving the old file list...")
-    router_manager.remove_messages(start_index=1, num_messages=1)
+    router_manager.remove_messages(start_index=2, num_messages=1)
 
-def get_file_bytes(file_path: str) -> bytes:    
-    with open(file_path, 'rb') as file:
-        return file.read()
+def move_file_list(new_content: str, start_index: int, num_messages: int) -> None:
+    print("\nMoving the updated file list to the front...")
+    router_manager.send_messages(messages=[new_content])
 
-def send_file_messages(file_bytes: bytes) -> bool:
+    print("\nRemoving the old file list...")
+    router_manager.remove_messages(start_index=num_messages + 2, num_messages=1)
+    
+def send_file_messages(file_bytes: bytes, num_messages: int, new_file_list_content: str) -> bool:
+    update_file_list(new_file_list_content)
+
     length = len(file_bytes)
-    max_bytes_per_message = config_manager.program_config["max_bytes_per_message"]
 
-    num_messages = ceildiv(length, max_bytes_per_message)
+    file_bytes = file_bytes[2:length - 1]
+
+    length -= 3
+
+    max_bytes_per_message = config_manager.program_config["max_bytes_per_message"]
 
     if(not proceed_prompt(f"\n{num_messages} messages will be sent." + RED + " This process can't be suspended until it's finished!" + RESET)):
         return False
     
-    messages = []
-    
-    for byte_index in range(0, length):
-        messages.append(file_bytes[byte_index:max_bytes_per_message])
+    messages = [file_bytes[i:i + max_bytes_per_message] for i in range(0, length, max_bytes_per_message)]
 
-    print(messages)
+    # print(messages)
+
+    print(f"\nSending {num_messages} messages. " + RED + "Don't quit." + RESET)
 
     router_manager.send_messages(messages)
-    
+
     return True
-
-def store_file(name: str, file_path: str) -> bool:
-    file_list = get_file_list()[1:]
-
-    names = get_file_names(file_list)
-
-    if(name in names):
-        print("\nName already exists. Please provide a different name. Already used: " + str(names))
-        return False
-
-    file_start_index = get_next_file_start_index(file_list)
-
-    file_bytes = get_file_bytes(file_path)
-
-    update_file_list(old_content=file_list, name=name, start_index=file_start_index)
-
-    return send_file_messages(file_bytes=file_bytes)

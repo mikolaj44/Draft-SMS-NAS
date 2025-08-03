@@ -1,10 +1,10 @@
 from ..utils.colors import *
 
-from ..data.actions.list_files import *
-from ..data.actions.load_file import *
-from ..data.actions.log_out import *
-from ..data.actions.remove_file import *
-from ..data.actions.store_file import *
+from ..actions.list_files import *
+from ..actions.load_file import *
+from ..actions.log_out import *
+from ..actions.remove_file import *
+from ..actions.store_file import *
 
 from .router import router_manager
 from .router import file_manager
@@ -16,14 +16,16 @@ from importlib.resources import files
 import stdiomask
 import atexit
 import datetime
+import os
 
 menu_actions = [ListFiles("View the list of all saved files"), StoreFile("Store a file"), LoadFile("Load a file"), RemoveFile("Remove a file"), LogOut("Log out and quit")]
 
 def safe_exit() -> None:
     try:
         router_manager.log_out()
-        quit()
-    except:
+        os._exit(status=os.EX_OK)
+    except Exception as e:
+        print(RED + "Could not exit. Reason: " + PURPLE + e + RESET)
         return
 
 atexit.register(safe_exit)
@@ -37,7 +39,7 @@ def log_in() -> None:
 
         print("\nPlease enter the password again or edit your config file to include the correct url.\n")
 
-    print(LIGHT_GREEN + "Logged in successfully!\n" + RESET)
+    print(LIGHT_GREEN + "\nLogged in successfully!\n" + RESET)
         
 def choice_is_valid(choice : str) -> None:
     if(not choice.isdigit()):
@@ -91,6 +93,15 @@ def main() -> None:
     config_manager.update_config()
 
     log_in()
+
+    # smses = router_manager.router.get_sms(get_from_draft=True, get_all = False, page_index = 1)
+
+    # for sms in smses:
+    #     print(sms.content)
+    #     print()
+
+    # print(router_manager.remove_messages(start_index=2, num_messages=1))
+    # safe_exit()
 
     if(not file_manager.set_config_num_messages_per_page()):
         safe_exit()

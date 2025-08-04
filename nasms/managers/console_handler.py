@@ -94,15 +94,6 @@ def main() -> None:
 
     log_in()
 
-    # smses = router_manager.router.get_sms(get_from_draft=True, get_all = False, page_index = 1)
-
-    # for sms in smses:
-    #     print(sms.content)
-    #     print()
-
-    # print(router_manager.remove_messages(start_index=2, num_messages=1))
-    # safe_exit()
-
     if(not file_manager.set_config_num_messages_per_page()):
         safe_exit()
     config_manager.update_config()

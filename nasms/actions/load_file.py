@@ -3,6 +3,10 @@ from .menu_action import *
 from ..managers.router import file_manager
 from ..managers.router import router_manager
 
+import magic
+import mimetypes
+import codecs
+
 class LoadFile(MenuAction):
     def select(self):
         file_list = file_manager.get_file_list()
@@ -26,8 +30,16 @@ class LoadFile(MenuAction):
         for message in messages[::-1]:
             file_content += message
 
-        print(messages)
         print(len(messages))
 
-        with open("./loaded_file", "w") as file:
-            file.write(file_content.encode("utf-8").decode("unicode_escape"))
+        mime = magic.Magic(mime=True)
+
+        file_bytes = codecs.decode(file_content, "unicode_escape").encode("latin1")
+
+        extension = mimetypes.guess_extension(mime.from_buffer(file_bytes))
+
+        if(extension == None):
+            extension = ""
+
+        with open(f"./nasms/loaded_files/{name}{extension}", "wb") as file:
+            file.write(file_bytes)

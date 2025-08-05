@@ -28,19 +28,19 @@ def set_config_num_messages_per_page() -> bool:
     if(not proceed_prompt(f"We need to save and then remove {num_messages_to_send} messages to find out how many per page there are.")):
         return False
         
-    print(f"Sending {num_messages_to_send} messages to get the number of messages per page..." + RED + " Dont't quit!" + RESET)
+    print(f"Sending {num_messages_to_send} messages to get the number of messages per page..." + RED + " Dont't quit!" + RESET + "\n")
     
     router_manager.send_messages(messages=["a"] * num_messages_to_send)
 
     num_messages_per_page = len(router_manager.get_first_page_messages())
 
-    print(f"Removing {num_messages_to_send} messages..." + RED + " Dont't quit!" + RESET)
+    config_manager.program_config["num_messages_per_page"] = num_messages_per_page
+
+    print(f"Removing {num_messages_to_send} messages..." + RED + " Dont't quit!" + RESET + "\n")
 
     router_manager.remove_messages(start_index=1, num_messages=num_messages_to_send)
 
     print(f"\nDone removing. There are {num_messages_per_page} messages per page.\n")
-
-    config_manager.program_config["num_messages_per_page"] = num_messages_per_page
 
     return True
 
@@ -54,6 +54,8 @@ def prepare_memory() -> bool:
     print("\nRemoving in progress. This will take a while if you have multiple pages - deleting messages is the slowest part of this 'system'. It's also probably the single action in this program that you can stop and come back to it later as it just clears the inbox.")
     
     router_manager.remove_all_messages()
+
+    print("\nSending the empty file list...")
 
     router_manager.send_messages(messages=["0;"])
 
@@ -73,7 +75,7 @@ def update_file_list(new_content: str) -> None:
     print("\nRemoving the old file list...")
     router_manager.remove_messages(start_index=2, num_messages=1)
 
-def move_file_list(new_content: str, start_index: int, num_messages: int) -> None:
+def move_file_list(new_content: str, num_messages: int) -> None:
     print("\nMoving the updated file list to the front...")
     router_manager.send_messages(messages=[new_content])
 
@@ -95,8 +97,6 @@ def send_file_messages(file_bytes: bytes, num_messages: int, new_file_list_conte
         return False
     
     messages = [file_bytes[i:i + max_bytes_per_message] for i in range(0, length, max_bytes_per_message)]
-
-    # print(messages)
 
     print(f"\nSending {num_messages} messages. " + RED + "Don't quit." + RESET)
 

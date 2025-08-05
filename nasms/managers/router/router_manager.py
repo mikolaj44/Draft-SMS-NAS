@@ -1,6 +1,6 @@
 from tplinkrouterc6udraftsms import (
     TplinkRouterProvider,
-    TPLinkMRClient,
+    TPLinkMRClient
 )
 
 from tplinkrouterc6udraftsms.common.exception import *
@@ -9,6 +9,8 @@ from ...utils.colors import *
 from ...utils.math_utils import *
 
 from ...managers import config_manager
+
+import tqdm
 
 router = None
 
@@ -22,7 +24,7 @@ def authorize(url : str, password : str) -> bool:
     try:
         router = TplinkRouterProvider.get_client(f"http://{url}", password)
 
-        if(not isinstance(router, TPLinkMRClient) and config_manager.user_config["ensure_router_is_MR"] == True):
+        if(not isinstance(router, TPLinkMRClient)):
             raise ValueError("Your router is not an MR model.")
 
         router.authorize()
@@ -45,7 +47,7 @@ def get_messages(start_index: int = 1, num_messages: int = 1) -> list[str]:
 
     messages = []
 
-    for page_index in range (start_page_index, end_page_index + 1):
+    for page_index in tqdm.tqdm(range(start_page_index, end_page_index + 1)):
         messages += router.get_sms_content(get_from_draft=True, page_index=page_index)
 
     start_cutoff = (start_index % max_messages_per_page) - 1
@@ -60,7 +62,7 @@ def get_first_page_messages() -> list[str]:
 def remove_messages(start_index: int, num_messages: int) -> bool:
     max_messages_per_page = config_manager.program_config["num_messages_per_page"]
 
-    return router.delete_smses(start_sms_index=start_index, num_smses=num_messages, max_messages_per_page=max_messages_per_page, delete_from_draft=True)
+    return router.delete_smses(start_sms_index=start_index, num_smses=num_messages, max_messages_per_page=max_messages_per_page, delete_from_draft=True, enable_tqdm=True)
 
 def remove_all_messages() -> None:
     can_remove = True
@@ -69,8 +71,10 @@ def remove_all_messages() -> None:
     max_messages_per_page = config_manager.program_config["num_messages_per_page"] 
 
     while(can_remove):
-        print(f"\nRemoving page {page_index}...")
+        print(f"\nTrying to remove page {page_index}...")
 
         can_remove = router.delete_sms_page(page_index=1, max_messages_per_page=max_messages_per_page, delete_from_draft=True)
         
+        print(f"Removed page {page_index}.")
+
         page_index += 1

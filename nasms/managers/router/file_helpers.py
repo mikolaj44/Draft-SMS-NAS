@@ -13,15 +13,15 @@ from . import file_manager
 
 from importlib.resources import files
 
-from tkinter.filedialog import Tk, askopenfilename
+import easygui
 
-def get_file_names(file_list: str) -> list[str]:
+def get_file_names(file_list: str, padded: bool = False) -> list[str]:
     parts = file_list.split(";")
 
     names = []
 
     for part in parts:
-        names.append(part[:file_manager.MAX_FILE_NAME_LENGTH].replace("_", ""))
+        names.append(part[:file_manager.MAX_FILE_NAME_LENGTH] if padded else part[:file_manager.MAX_FILE_NAME_LENGTH].replace("_", ""))
 
     return list(filter(("").__ne__, names))[1:]
 
@@ -46,16 +46,6 @@ def get_file_start_index_and_length_from_beginning(file_list: str, file_name: st
 
     start_index =  total_num_messages + 3 - start_indices[name_index] - length
 
-    # list
-    # hl
-    # hl
-    # hl
-    # cnfg
-    # mngr
-    # mngr
-    # mngr
-    # mngr
-
     return start_index, length
 
 def get_num_sent_messages(file_list: str) -> int:
@@ -74,21 +64,12 @@ def get_num_messages_for_file(file_bytes: bytes) -> int:
 def get_next_file_start_index(file_list : str) -> int:    
     return get_num_sent_messages(file_list) + 1
 
-def get_new_file_list_content(old_content: str, name: str, start_index: int, num_messages: int) -> str:
-    first_semicolon_pos = old_content.find(";")
-
-    new_num_messages = int(old_content[:first_semicolon_pos]) + num_messages
-
-    return str(new_num_messages) + old_content[first_semicolon_pos:] + name + str(start_index) + ";"
-
 def get_file_bytes(file_path: str) -> bytes:    
     with open(file_path, 'rb') as file:
         return str(file.read())
 
 def get_file_path() -> str:
-    Tk().withdraw()
-        
-    return askopenfilename()
+    return easygui.fileopenbox(msg="Choose your file")
 
 def file_name_is_valid(name: str) -> bool:
     length = len(name)

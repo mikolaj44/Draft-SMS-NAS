@@ -15,31 +15,35 @@ from . import ip_manager
 from importlib.resources import files
 import stdiomask
 import atexit
-import datetime
 import os
 
-menu_actions = [ListFiles("View the list of all saved files"), StoreFile("Store a file"), LoadFile("Load a file"), RemoveFile("Remove a file"), LogOut("Log out and quit")]
+menu_actions = [ListFiles("View the list of all saved files"), LoadFile("Load a file"), StoreFile("Store a file"), RemoveFile("Remove a file"), LogOut("Log out and quit")]
+special_quit_password = "quitsmsnas"
 
 def safe_exit() -> None:
     try:
         router_manager.log_out()
+    finally:
         os._exit(status=os.EX_OK)
-    except Exception as e:
-        print(RED + "Could not exit. Reason: " + PURPLE + e + RESET)
-        return
 
 atexit.register(safe_exit)
 
-def log_in() -> None:
-    print("Please enter your router password to authorize: (commonly \"admin\")\n")
+def log_in() -> bool:
+    print("\nPlease enter your router password to authorize: (commonly \"admin\")\n")
 
     while True:
-        if(router_manager.authorize(config_manager.user_config["url"], str(stdiomask.getpass()))):
+        password = str(stdiomask.getpass())
+
+        if(password == special_quit_password):
+            return False
+        elif(router_manager.authorize(config_manager.user_config["url"], password)):
             break
 
-        print("\nPlease enter the password again or edit your config file to include the correct url.\n")
+        print(f"\nPlease enter the password again or edit your config file to include the correct url. You can also type {special_quit_password} to quit.\n")
 
-    print(LIGHT_GREEN + "\nLogged in successfully!\n" + RESET)
+    print(GREEN + "\nLogged in successfully!\n" + RESET)
+
+    return True
         
 def choice_is_valid(choice : str) -> None:
     if(not choice.isdigit()):
@@ -76,13 +80,13 @@ def menu_loop() -> None:
 def display_welcome_message() -> None:
     print("\n" + LIGHT_GREEN + "Welcome to Draft SMS \"NAS\"!" + RESET)
 
-    print("\n" + RED + "Keep in mind that you can't manually save messages to the draft inbox if you want this program to work correctly - it will clear all of them when using it for the first time, but not later, so you will have to manually remove everything before the first (file list) message\n" + RESET)
-
     if (config_manager.user_config["show-warnings"] == True):
-        print(RED + "WARNING: Remember that this tool requires your router to have SMS support (LTE, SIM card) and will clean your SMS draft inbox in order to prepare the memory.\n")
-        print("WARNING: Your router internal memory is VERY small, the draft inbox on the TL-MR150 is probably like 5 MB in size, so don't save \"big\" files.\n")
+        print("\n" + RED + "Keep in mind that you can't manually save messages to the draft inbox if you want this program to work correctly - it will clear all of them\nwhen using it for the first time, but not later, so you will have to manually remove everything before the first (file list) message\n" + RESET)
+
+        print(RED + "Remember that this tool requires your MR series router to have SMS support (LTE, SIM card) and will clean your SMS draft inbox in order to prepare the memory.\n")
+        print("Your router internal memory is VERY small, the draft inbox on the TL-MR150 is probably like 5 MB in size, so don't save \"big\" files, maybe up to like 100 kilobytes.\n")
     
-        print(YELLOW + "You can disable the warnings in your config.txt file.\n" + RESET)
+        print(YELLOW + "You can disable these warnings in your user_config.json file." + RESET)
 
 def main() -> None:    
     config_manager.set_config()
@@ -92,7 +96,8 @@ def main() -> None:
     ip_manager.set_ip()
     config_manager.update_config()
 
-    log_in()
+    if(not log_in()):
+        safe_exit()
 
     if(not file_manager.set_config_num_messages_per_page()):
         safe_exit()
@@ -105,26 +110,3 @@ def main() -> None:
     menu_loop()
 
     safe_exit()
-
-    # list_ = router_manager.get_messages(startIndex=1, numMessages=6)
-    # print("===")
-
-    # for item in list_:
-    #     print(item + "\n")
-
-    # start = datetime.datetime.now()
-
-    # #router_manager.router.delete_sms_page(pageIndex=1, maxMessagesPerPage=8, deleteFromDraft=True)
-
-    # #for i in range(1, 9):
-    # #    router_manager.router.delete_sms(pageIndex=1, smsIndex=i, deleteFromDraft=True)
-
-    # # router_manager.send_messages(["a" * 1430] * 50)
-    
-    # router_manager.router.delete_smses(start_sms_index=1, num_smses=8, max_messages_per_page=8, delete_from_draft=True)
-
-    # end = datetime.datetime.now()
-
-    # print(end - start)
-
-    # quit()

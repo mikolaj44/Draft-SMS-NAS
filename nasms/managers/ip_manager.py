@@ -15,7 +15,7 @@ def ip_is_valid(ip : str) -> bool:
 def set_ip() -> None:
     ip = config_manager.user_config["url"]
 
-    if(ip_is_valid(ip)):
+    if(isinstance(ip, str) and ip_is_valid(ip)):
         return
 
     print(LIGHT_GREEN + "Please enter your router private ip:\n" + RESET)

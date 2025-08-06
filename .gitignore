@@ -1,2 +1,3 @@
-sms_nas.egg-info/
+smsnas.egg-info/
+build/
 __pycache__

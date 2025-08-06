@@ -10,8 +10,8 @@ program_config_file = None
 def set_config() -> None:
     global user_config, user_config_file, program_config, program_config_file
     
-    user_config_file = files("nasms") / "user_config.json"
-    program_config_file = files("nasms") / "program_config.json"
+    user_config_file = files("smsnas") / "user_config.json"
+    program_config_file = files("smsnas") / "program_config.json"
 
     with user_config_file.open("r+", encoding="utf-8") as f:
         user_config = json.load(f)

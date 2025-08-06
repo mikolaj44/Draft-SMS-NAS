@@ -25,8 +25,8 @@ class ListFiles(MenuAction):
         print("\nGetting the file list...")
         file_list = file_manager.get_file_list()
 
-        print("\n=================================")
-        print(f"Number of saved files: {file_helpers.get_num_files(file_list)} ({file_helpers.get_num_sent_messages(file_list)} total messages), list: (recently saved on the top)")
+        file_manager.quit_on_incorrect_file_list(file_list)
+
+        print(f"\nNumber of saved files: {file_helpers.get_num_files(file_list)} ({file_helpers.get_num_sent_messages(file_list)} total messages), list: (recently saved on the top)")
         print(f"\n{get_formatted_list(file_list)}")
-        print("Raw data list:\n\n" + file_list)
-        print("=================================\n")
+        print("Raw data list:\n\n" + file_list + "\n")

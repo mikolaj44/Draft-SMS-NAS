@@ -29,7 +29,7 @@ def authorize(url : str, password : str) -> bool:
 
         router.authorize()
     except Exception as e:
-        print(RED + "\nCould not log in, reason from the tplinkrouterc6u library: " + PURPLE + str(e) + RESET)
+        print(RED + "\nCould not log in, reason from the tplinkrouterc6u library: " + LIGHT_PURPLE + str(e) + RESET)
         return False
     return True
 

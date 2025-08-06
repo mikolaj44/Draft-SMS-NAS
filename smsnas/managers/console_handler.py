@@ -54,11 +54,18 @@ def choice_is_valid(choice : str) -> None:
     return num >= 1 and num <= len(menu_actions)
 
 def menu_loop() -> None:
+    longest_description_length = 0
+
+    for action in menu_actions:
+        length = len(action.description)
+        if(length > longest_description_length):
+            longest_description_length = length
+
     while True:
-        print(LIGHT_GREEN + "Possible actions:\n" + LIGHT_BLUE)
+        print(LIGHT_GREEN + "Possible actions:\n" + LIGHT_WHITE + NEGATIVE)
 
         for i in range(len(menu_actions)):
-            print(f"[{i + 1}] " + menu_actions[i].description)
+            print(f"[{i + 1}] " + menu_actions[i].description + " " * (longest_description_length + 1 - len(menu_actions[i].description)))
 
         print(RESET)
 

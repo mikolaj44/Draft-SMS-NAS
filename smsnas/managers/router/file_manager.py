@@ -28,7 +28,7 @@ def set_config_num_messages_per_page() -> bool:
     if(not proceed_prompt(f"We need to save and then remove {num_messages_to_send} messages to find out how many per page there are.")):
         return False
         
-    print(f"Sending {num_messages_to_send} messages to get the number of messages per page..." + RED + " Dont't quit!" + RESET + "\n")
+    print(f"\nSending {num_messages_to_send} messages to get the number of messages per page..." + RED + " Dont't quit!" + RESET)
     
     router_manager.send_messages(messages=["a"] * num_messages_to_send)
 
@@ -36,7 +36,7 @@ def set_config_num_messages_per_page() -> bool:
 
     config_manager.program_config["num_messages_per_page"] = num_messages_per_page
 
-    print(f"Removing {num_messages_to_send} messages..." + RED + " Dont't quit!" + RESET + "\n")
+    print(f"\nRemoving {num_messages_to_send} messages..." + RED + " Dont't quit!" + RESET)
 
     router_manager.remove_messages(start_index=1, num_messages=num_messages_to_send)
 
@@ -48,9 +48,17 @@ def prepare_memory() -> bool:
     if(config_manager.program_config["is_initial_setup"] == False):
         return True
     
-    if(not proceed_prompt("The draft inbox needs to be wiped.")):
+    if(proceed_prompt("Did you prepare this router's draft memory on a different device before?", fullPrompt=False)):
+        if(proceed_prompt("\nAre you sure that the layout is correct?", fullPrompt=False)):
+            config_manager.program_config["is_initial_setup"] = False
+            return True
+    
+    if(not proceed_prompt("\nThe draft inbox needs to be wiped to prepare the memory because it wasn't prepared earlier.")):
         return False
 
+    if(not proceed_prompt("\nMake sure that no one else is using the draft inbox with this program! Do you want to clear it?", fullPrompt=False)):
+        return False
+    
     print("\nRemoving in progress. This will take a while if you have multiple pages - deleting messages is the slowest part of this 'system'. It's also probably the single action in this program that you can stop and come back to it later as it just clears the inbox.")
     
     router_manager.remove_all_messages()
@@ -93,12 +101,9 @@ def send_file_messages(file_bytes: bytes, num_messages: int, new_file_list_conte
 
     max_bytes_per_message = config_manager.program_config["max_bytes_per_message"]
 
-    if(not proceed_prompt(f"\n{num_messages} messages will be sent." + RED + " This process can't be suspended until it's finished!" + RESET)):
-        return False
-    
-    messages = [file_bytes[i:i + max_bytes_per_message] for i in range(0, length, max_bytes_per_message)]
+    print(f"\nSending {num_messages} messages." + RED + " This process can't be suspended until it's finished!" + RESET)
 
-    print(f"\nSending {num_messages} messages. " + RED + "Don't quit." + RESET)
+    messages = [file_bytes[i:i + max_bytes_per_message] for i in range(0, length, max_bytes_per_message)]
 
     router_manager.send_messages(messages)
 

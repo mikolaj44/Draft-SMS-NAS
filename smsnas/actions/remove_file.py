@@ -5,6 +5,7 @@ from ..utils.proceed_prompt import *
 
 from ..managers.router import file_manager
 from ..managers.router import router_manager
+from ..managers import console_handler
 
 def get_new_file_list_content(file_list: str, file_name: str, num_messages: int) -> str:
     file_names = file_manager.get_file_names(file_list, padded=True)
@@ -33,6 +34,8 @@ class RemoveFile(MenuAction):
         print("\nGetting the file list...")
         file_list = file_manager.get_file_list()
 
+        file_manager.quit_on_incorrect_file_list(file_list)
+
         print(f"\nStored file names: {file_manager.get_file_names(file_list)}")
 
         name = file_manager.get_file_name(file_list, require_new_name=False)
@@ -41,8 +44,6 @@ class RemoveFile(MenuAction):
 
         if(not proceed_prompt(f"\nAre you sure you want to remove '{name}'? ({num_messages} messages)\n" + RED + "This will take a while and this process cannot be suspended." + RESET)):
             return
-
-        print(RED + "\nBeginning the process, don't quit." + RESET)
         
         new_file_list = get_new_file_list_content(file_list=file_list, file_name=name, num_messages=num_messages)
 

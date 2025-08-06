@@ -2,18 +2,16 @@ from ...utils.colors import *
 from ...utils.proceed_prompt import *
 from ...utils.math_utils import *
 
-from ...actions.list_files import *
-from ...actions.load_file import *
-from ...actions.log_out import *
-from ...actions.remove_file import *
-from ...actions.store_file import *
+from ...actions import list_files
 
 from .. import config_manager
+from .. import console_handler
 from . import file_manager
 
 from importlib.resources import files
 
-import easygui
+from tkinter import Tk
+from tkinter.filedialog import askopenfilename
 
 def get_file_names(file_list: str, padded: bool = False) -> list[str]:
     parts = file_list.split(";")
@@ -24,6 +22,13 @@ def get_file_names(file_list: str, padded: bool = False) -> list[str]:
         names.append(part[:file_manager.MAX_FILE_NAME_LENGTH] if padded else part[:file_manager.MAX_FILE_NAME_LENGTH].replace("_", ""))
 
     return list(filter(("").__ne__, names))[1:]
+
+def quit_on_incorrect_file_list(file_list: str):
+    try:
+        list_files.get_formatted_list(file_list)
+    except Exception as e:
+        print(RED + f"\nYour memory is not set up correctly. Please fix it manually, there may be some leading messages before the file list. Got exception: " + LIGHT_PURPLE + str(e) + RESET)
+        console_handler.safe_exit()
 
 def get_file_start_indices(file_list: str) -> list[int]:
     parts = file_list.split(";")
@@ -69,7 +74,8 @@ def get_file_bytes(file_path: str) -> bytes:
         return str(file.read())
 
 def get_file_path() -> str:
-    return easygui.fileopenbox(msg="Choose your file")
+    Tk().withdraw()
+    return askopenfilename()
 
 def file_name_is_valid(name: str) -> bool:
     length = len(name)

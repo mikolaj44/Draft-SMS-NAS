@@ -18,7 +18,7 @@ def set_ip() -> None:
     if(isinstance(ip, str) and ip_is_valid(ip)):
         return
 
-    print(LIGHT_GREEN + "Please enter your router private ip:\n" + RESET)
+    print(LIGHT_GREEN + "\nPlease enter your router private ip: (commonly 192.168.1.1 or 192.168.0.1)\n" + RESET)
 
     while (True):
         ip = input()

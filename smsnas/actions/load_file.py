@@ -15,6 +15,8 @@ class LoadFile(MenuAction):
         print("\nGetting the file list...")
         file_list = file_manager.get_file_list()
 
+        file_manager.quit_on_incorrect_file_list(file_list)
+
         print(f"\nStored file names: {file_manager.get_file_names(file_list)}")
 
         name = file_manager.get_file_name(file_list, require_new_name=False)
@@ -32,8 +34,6 @@ class LoadFile(MenuAction):
         for message in messages[::-1]:
             file_content += message
 
-        print(len(messages))
-
         mime = magic.Magic(mime=True)
 
         file_bytes = codecs.decode(file_content, "unicode_escape").encode("latin1")
@@ -43,7 +43,7 @@ class LoadFile(MenuAction):
         if(extension == None):
             extension = ""
 
-        file_path = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..')) + f"/loaded_files/{name}{extension}"
+        file_path = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', "loaded_files", f"{name}{extension}"))
 
         with open(file_path, "wb") as file:
             file.write(file_bytes)

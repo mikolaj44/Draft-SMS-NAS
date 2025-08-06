@@ -1,0 +1,7 @@
+{
+    "comment": "Editing this file manually may result in breaking the program!",
+    "is_initial_setup": true,
+    "num_messages_per_page": 0,
+    "num_messages_to_send_to_find_num_per_page": 15,
+    "max_bytes_per_message": 1430
+}
